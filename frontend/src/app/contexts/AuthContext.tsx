@@ -12,7 +12,7 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
 }
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -50,6 +50,7 @@ const register = async (name: string, email: string, password: string) => {
 
 const login = async (email: string, password: string) => {
   try {
+    console.log(BASE_URL)
     const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
