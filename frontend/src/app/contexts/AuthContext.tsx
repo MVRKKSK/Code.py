@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
 interface User {
   id: string;
   email: string;
@@ -13,7 +12,7 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
 }
-
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -30,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 const register = async (name: string, email: string, password: string) => {
   try {
-    const res = await fetch('http://localhost:5000/api/auth/register', {
+    const res = await fetch(`${BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
@@ -51,7 +50,7 @@ const register = async (name: string, email: string, password: string) => {
 
 const login = async (email: string, password: string) => {
   try {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
+    const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),

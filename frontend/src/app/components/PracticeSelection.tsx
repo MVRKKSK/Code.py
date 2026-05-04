@@ -14,8 +14,8 @@ import {
 import { BookOpen, Play } from 'lucide-react';
 
 
-
 export function PracticeSelection() {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   const navigate = useNavigate();
   const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
@@ -27,7 +27,7 @@ export function PracticeSelection() {
   useEffect(() => {
     const fetchPracticeTests = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/problems/practice', {
+        const res = await fetch(`${BASE_URL}/api/problems/practice`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },

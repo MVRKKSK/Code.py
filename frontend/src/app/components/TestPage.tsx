@@ -21,6 +21,7 @@ interface QuestionResult {
 }
 
 export function TestPage() {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   const { testId } = useParams();
   const navigate = useNavigate();
   const [test, setTest] = useState<PracticeTest | null>(null);
@@ -41,7 +42,7 @@ export function TestPage() {
 
 useEffect(() => {
   const fetchTest = async () => {
-    const res = await fetch(`http://localhost:5000/api/problems/tests/${testId}`, {
+    const res = await fetch(`${BASE_URL}/api/problems/tests/${testId}`, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -106,7 +107,7 @@ const handleNext = async () => {
 
   try {
     // 🔥 2. Send to backend (exercise history + progress)
-    await fetch('http://localhost:5000/api/progress/exercise', {
+    await fetch(`${BASE_URL}/api/progress/exercise`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -162,7 +163,7 @@ const completeTest = async () => {
   });
 
   try {
-    await fetch('http://localhost:5000/api/progress/test', {
+    await fetch(`${BASE_URL}/api/progress/test`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

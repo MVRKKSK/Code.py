@@ -7,6 +7,7 @@ import { TrendingUp, Target, Flame, Calendar, Award, BarChart3, BookOpen } from 
 
 
 export function ProgressPage() {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   const [progress, setProgress] = useState<UserProgress>({
     totalAttempts: 0,
     correctAnswers: 0,
@@ -19,7 +20,7 @@ export function ProgressPage() {
 useEffect(() => {
   const fetchProgress = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/progress/getProgress', {
+      const res = await fetch(`${BASE_URL}/api/progress/getProgress`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
