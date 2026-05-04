@@ -26,7 +26,7 @@ export function SettingsPage() {
         <div>
           <h1 className="mb-2">Settings</h1>
           <p className="text-muted-foreground">
-            Manage your Code.py preferences and data
+            Manage your CodeLens preferences and data
           </p>
         </div>
         
@@ -34,11 +34,11 @@ export function SettingsPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <SettingsIcon className="h-5 w-5 text-primary" />
-            <h2>About Code.py</h2>
+            <h2>About CodeLens</h2>
           </div>
           <div className="space-y-4 text-muted-foreground">
             <p>
-              Code.py is an educational tool designed to help you improve your code reading 
+              CodeLens is an educational tool designed to help you improve your code reading 
               and comprehension skills through deliberate practice.
             </p>
             <p>
@@ -80,7 +80,7 @@ export function SettingsPage() {
         
         {/* How to Use */}
         <Card className="p-6">
-          <h2 className="mb-4">How to Use Code.py</h2>
+          <h2 className="mb-4">How to Use CodeLens</h2>
           <div className="space-y-4">
             <div className="space-y-2">
               <h3 className="text-base">1. Choose an Exercise</h3>

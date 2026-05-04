@@ -3,24 +3,55 @@ import { initialUserProgress } from '../data';
 import { UserProgress } from '../types';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { TrendingUp, Target, Flame, Calendar, Award, BarChart3 } from 'lucide-react';
+import { TrendingUp, Target, Flame, Calendar, Award, BarChart3, BookOpen } from 'lucide-react';
 
-const STORAGE_KEY = 'codelens_progress';
 
 export function ProgressPage() {
-  const [progress, setProgress] = useState<UserProgress>(initialUserProgress);
-  
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setProgress(JSON.parse(stored));
+  const [progress, setProgress] = useState<UserProgress>({
+    totalAttempts: 0,
+    correctAnswers: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    lastPracticeDate: '',
+    exerciseHistory: [],
+    testHistory: []
+  });
+useEffect(() => {
+  const fetchProgress = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/progress/getProgress', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const data = await res.json();
+
+      setProgress({
+      totalAttempts: data.progress.total_attempts,
+      correctAnswers: data.progress.correct_answers,
+      currentStreak: data.progress.current_streak,
+      bestStreak: data.progress.best_streak,
+      lastPracticeDate: data.progress.last_practice_date, // ✅ FIX
+      testHistory: data.testHistory || [],
+      exerciseHistory: data.exerciseHistory || []
+    });
+    console.log(data)
+    } catch (err) {
+      console.error('Failed to load progress', err);
     }
-  }, []);
-  
+  };
+
+  fetchProgress();
+}, []);
+
+
+
   const accuracy = progress.totalAttempts > 0
     ? Math.round((progress.correctAnswers / progress.totalAttempts) * 100)
     : 0;
-  
+
+  const recentTests = (progress.testHistory || []).slice(0, 5);
   const recentHistory = progress.exerciseHistory.slice(0, 10);
   
   return (
@@ -85,13 +116,80 @@ export function ProgressPage() {
           </Card>
         </div>
         
+        {/* Test History */}
+        <Card className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <h2>Recent Tests</h2>
+          </div>
+
+          {recentTests.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No completed tests yet</p>
+              <p className="text-sm mt-2">Take your first practice test to see results here</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentTests.map((test, index) => (
+                <div
+                  key={index}
+                  className="border border-border rounded-lg p-4 flex items-center justify-between gap-4"
+                >
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <Badge variant={test.score >= 80 ? 'default' : 'secondary'}>
+                        {test.score >= 80 ? 'Passed' : 'Needs Improvement'}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(test.created_at).toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Score: </span>
+                        <span className="font-medium">{test.score}%</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Correct: </span>
+                        <span className="font-medium">{test.correct_answers}/{test.total_questions}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Duration: </span>
+                        <span className="font-medium">
+                          {Math.floor(test.duration / 60)}m {test.duration % 60}s
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div
+                      className={`text-2xl font-bold ${
+                        test.score >= 80
+                          ? 'text-green-600'
+                          : test.score >= 50
+                          ? 'text-yellow-600'
+                          : 'text-red-600'
+                      }`}
+                    >
+                      {test.score}%
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
         {/* Recent Activity */}
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <BarChart3 className="h-5 w-5 text-primary" />
-            <h2>Recent Activity</h2>
+            <h2>Recent Questions</h2>
           </div>
-          
+
           {recentHistory.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -107,46 +205,42 @@ export function ProgressPage() {
                 >
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3">
-                      <Badge variant={attempt.wasCorrect ? 'default' : 'secondary'}>
-                        {attempt.wasCorrect ? 'Correct' : 'Incorrect'}
+                      <Badge variant={attempt.was_correct ? 'default' : 'secondary'}>
+                        {attempt.was_correct ? 'Correct' : 'Incorrect'}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        Exercise #{attempt.exerciseId}
+                        Question #{attempt.problem_id}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        {new Date(attempt.timestamp).toLocaleDateString()}
+                        {new Date(attempt.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                    
-                    <div className="grid sm:grid-cols-3 gap-4 text-sm">
+
+                    <div className="grid sm:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Similarity: </span>
-                        <span className="font-medium">{attempt.similarityScore}%</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Confidence: </span>
-                        <span className="font-medium">{attempt.confidence}%</span>
+                        <span className="font-medium">{attempt.similarity_score}%</span>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Time: </span>
                         <span className="font-medium">
-                          {new Date(attempt.timestamp).toLocaleTimeString()}
+                          {new Date(attempt.created_at).toLocaleTimeString()}
                         </span>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     <div
                       className={`text-2xl ${
-                        attempt.similarityScore >= 80
+                        attempt.similarity_score >= 80
                           ? 'text-green-600'
-                          : attempt.similarityScore >= 50
+                          : attempt.similarity_score >= 50
                           ? 'text-yellow-600'
                           : 'text-red-600'
                       }`}
                     >
-                      {attempt.similarityScore}%
+                      {attempt.similarity_score}%
                     </div>
                   </div>
                 </div>
@@ -156,7 +250,7 @@ export function ProgressPage() {
         </Card>
         
         {/* Performance Insights */}
-        {progress.totalAttempts > 0 && (
+        {progress.total_attempts > 0 && (
           <Card className="p-6">
             <h2 className="mb-4">Insights</h2>
             <div className="space-y-4">
@@ -168,15 +262,15 @@ export function ProgressPage() {
                 </div>
               )}
               
-              {progress.currentStreak >= 3 && (
+              {progress.current_streak >= 3 && (
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                   <p className="text-sm text-orange-800">
-                    🔥 You're on fire! {progress.currentStreak} day streak and counting!
+                    🔥 You're on fire! {progress.current_streak} day streak and counting!
                   </p>
                 </div>
               )}
               
-              {progress.totalAttempts >= 10 && accuracy < 50 && (
+              {progress.total_attempts >= 10 && accuracy < 50 && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">
                     💡 Tip: Take your time to analyze each line of code. Use the execution trace feature to understand how the code runs step by step.
@@ -184,7 +278,7 @@ export function ProgressPage() {
                 </div>
               )}
               
-              {progress.currentStreak === 0 && progress.bestStreak > 0 && (
+              {progress.current_streak === 0 && progress.best_streak > 0 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <p className="text-sm text-yellow-800">
                     📅 Your streak is broken. Practice today to start a new one!

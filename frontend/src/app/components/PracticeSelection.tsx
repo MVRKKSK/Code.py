@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { mockExercises } from '../data';
+// import { practiceTests } from '../data';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
@@ -11,33 +11,66 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { Code2 } from 'lucide-react';
+import { BookOpen, Play } from 'lucide-react';
+
+
 
 export function PracticeSelection() {
   const navigate = useNavigate();
   const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  
-  // Get unique values
-  const languages = ['all', ...Array.from(new Set(mockExercises.map(e => e.language)))];
+  const [practiceTests, setPracticeTests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchPracticeTests = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/problems/practice', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch tests');
+
+        const data = await res.json();
+        console.log(data)
+        setPracticeTests(data);
+
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPracticeTests();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+
+  const languages = ['all', ...Array.from(new Set(practiceTests.map(t => t.language)))];
   const difficulties = ['all', 'easy', 'medium', 'hard'];
-  const allTags = Array.from(new Set(mockExercises.flatMap(e => e.tags)));
+  const allTags = Array.from(new Set(practiceTests.flatMap(t => t.tags)));
   
-  // Filter exercises
-  const filteredExercises = mockExercises.filter(exercise => {
-    const languageMatch = selectedLanguage === 'all' || exercise.language === selectedLanguage;
-    const difficultyMatch = selectedDifficulty === 'all' || exercise.difficulty === selectedDifficulty;
-    const tagMatch = selectedTags.length === 0 || selectedTags.some(tag => exercise.tags.includes(tag));
+
+  const filteredTests = practiceTests.filter(test => {
+    const languageMatch = selectedLanguage === 'all' || test.language === selectedLanguage;
+    const difficultyMatch = selectedDifficulty === 'all' || test.difficulty === selectedDifficulty;
+    const tagMatch = selectedTags.length === 0 || selectedTags.some(tag => test.tags.includes(tag));
     return languageMatch && difficultyMatch && tagMatch;
   });
-  
+
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
   };
-  
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy': return 'bg-green-100 text-green-800 border-green-200';
@@ -46,19 +79,17 @@ export function PracticeSelection() {
       default: return '';
     }
   };
-  
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="space-y-8">
-        {/* Header */}
         <div>
-          <h1 className="mb-2">Practice Selection</h1>
+          <h1 className="mb-2">Practice Tests</h1>
           <p className="text-muted-foreground">
-            Choose an exercise to test your code reading skills
+            Select a practice test to begin. Each test contains 10-15 questions.
           </p>
         </div>
-        
-        {/* Filters */}
+
         <Card className="p-6">
           <div className="space-y-6">
             <div className="grid sm:grid-cols-2 gap-4">
@@ -77,7 +108,7 @@ export function PracticeSelection() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm">Difficulty</label>
                 <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
@@ -94,7 +125,7 @@ export function PracticeSelection() {
                 </Select>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm">Topics</label>
               <div className="flex flex-wrap gap-2">
@@ -112,54 +143,69 @@ export function PracticeSelection() {
             </div>
           </div>
         </Card>
-        
-        {/* Exercise List */}
+
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl">
-              Available Exercises ({filteredExercises.length})
+              Available Tests ({filteredTests.length})
             </h2>
           </div>
-          
-          <div className="grid gap-4">
-            {filteredExercises.map(exercise => (
-              <Card key={exercise.id} className="p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Code2 className="h-5 w-5 text-primary" />
-                      <span className="font-medium">{exercise.language}</span>
-                      <Badge className={getDifficultyColor(exercise.difficulty)}>
-                        {exercise.difficulty}
-                      </Badge>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredTests.map(test => (
+              <Card key={test.id} className="p-6 hover:shadow-md transition-shadow">
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold">{test.title}</h3>
                     </div>
-                    
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-                      <code>{exercise.code}</code>
-                    </pre>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {exercise.tags.map(tag => (
-                        <Badge key={tag} variant="secondary">
-                          {tag}
-                        </Badge>
-                      ))}
+                    <Badge className={getDifficultyColor(test.difficulty)}>
+                      {test.difficulty}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between">
+                      <span>Language:</span>
+                      <span className="font-medium text-foreground">{test.language}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Questions:</span>
+                      <span className="font-medium text-foreground">{test.total_questions}</span>
                     </div>
                   </div>
-                  
-                  <Button onClick={() => navigate(`/exercise/${exercise.id}`)}>
-                    Start
+
+                  <div className="flex flex-wrap gap-2">
+                    {test.tags.slice(0, 3).map(tag => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {test.tags.length > 3 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{test.tags.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <Button
+                    onClick={() => navigate(`/test/${test.id}`)}
+                    className="w-full"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Test
                   </Button>
                 </div>
               </Card>
             ))}
           </div>
-          
-          {filteredExercises.length === 0 && (
+
+          {filteredTests.length === 0 && (
             <Card className="p-12">
               <div className="text-center text-muted-foreground">
-                <Code2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No exercises match your filters</p>
+                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No tests match your filters</p>
               </div>
             </Card>
           )}

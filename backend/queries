@@ -1,0 +1,129 @@
+-- PROFILES TABLE
+create table public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text not null unique,
+  name text,
+  created_at timestamp with time zone default now()
+);
+
+alter table public.profiles enable row level security;
+
+create policy "Users can insert own profile"
+on public.profiles
+for insert
+to authenticated
+with check (auth.uid() = id);
+
+create policy "Users can update own profile"
+on public.profiles
+for update
+to authenticated
+using (auth.uid() = id);
+
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, email)
+  values (new.id, new.email);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute procedure public.handle_new_user();
+
+# practice problems 
+
+create table public.practice_problems (
+  id text primary key, -- using your existing ids ('1','2',...)
+  language text,
+  difficulty text,
+  code text,
+  expected_output text,
+  explanation text,
+  tags text[], -- array
+  execution_trace jsonb, -- complex structure
+  created_at timestamp default now()
+);
+
+create table public.submissions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+  problem_id uuid references problems(id) on delete cascade,
+  code text,
+  language text,
+  status text, -- accepted, wrong_answer, tle, etc
+  runtime float,
+  created_at timestamp default now()
+);
+
+create table public.practice_tests (
+  id text primary key, -- 'test-1'
+  title text,
+  language text,
+  difficulty text,
+  tags text[],
+  total_questions int,
+  created_at timestamp default now()
+);
+
+create table public.practice_test_questions (
+  id uuid primary key default gen_random_uuid(),
+  test_id text references practice_tests(id) on delete cascade,
+  question_id text references practice_problems(id) on delete cascade,
+  order_index int
+);
+
+create table public.user_progress (
+  user_id uuid primary key references profiles(id) on delete cascade,
+  total_attempts int default 0,
+  correct_answers int default 0,
+  current_streak int default 0,
+  best_streak int default 0,
+  last_practice_date date,
+  created_at timestamp default now(),
+  updated_at timestamp default now()
+);
+
+create table public.user_progress (
+  user_id uuid primary key references profiles(id) on delete cascade,
+
+  total_attempts int default 0,
+  correct_answers int default 0,
+
+  current_streak int default 0,
+  best_streak int default 0,
+  last_practice_date date,
+
+  created_at timestamp default now(),
+  updated_at timestamp default now()
+);
+
+create table public.exercise_attempts (
+  id uuid primary key default gen_random_uuid(),
+
+  user_id uuid references profiles(id) on delete cascade,
+  problem_id text references practice_problems(id) on delete cascade,
+
+  was_correct boolean,
+  similarity_score int, -- % from your UI
+
+  code text,
+  language text,
+
+  created_at timestamp default now()
+);
+
+create table public.test_question_attempts (
+  id uuid primary key default gen_random_uuid(),
+
+  test_attempt_id uuid references test_attempts(id) on delete cascade,
+  question_id text references practice_problems(id),
+
+  was_correct boolean,
+  similarity_score int,
+
+  created_at timestamp default now()
+);
+

@@ -1,10 +1,12 @@
 import { createBrowserRouter } from 'react-router';
 import { RootLayout } from './components/RootLayout';
 import { LandingPage } from './components/LandingPage';
-import { PracticeSelection } from './components/PracticeSelection';
-import { ExercisePage } from './components/ExercisePage';
-import { ProgressPage } from './components/ProgressPage';
-import { SettingsPage } from './components/SettingsPage';
+import { LoginPage } from './components/LoginPage';
+import { RegisterPage } from './components/RegisterPage';
+import { ProtectedPractice } from './components/ProtectedPractice';
+import { ProtectedTest } from './components/ProtectedTest';
+import { ProtectedProgress } from './components/ProtectedProgress';
+import { ProtectedSettings } from './components/ProtectedSettings';
 import { NotFoundPage } from './components/NotFoundPage';
 
 export const router = createBrowserRouter([
@@ -13,10 +15,12 @@ export const router = createBrowserRouter([
     Component: RootLayout,
     children: [
       { index: true, Component: LandingPage },
-      { path: 'practice', Component: PracticeSelection },
-      { path: 'exercise/:exerciseId', Component: ExercisePage },
-      { path: 'progress', Component: ProgressPage },
-      { path: 'settings', Component: SettingsPage },
+      { path: 'login', Component: LoginPage },
+      { path: 'register', Component: RegisterPage },
+      { path: 'practice', Component: ProtectedPractice },
+      { path: 'test/:testId', Component: ProtectedTest },
+      { path: 'progress', Component: ProtectedProgress },
+      { path: 'settings', Component: ProtectedSettings },
       { path: '*', Component: NotFoundPage },
     ],
   },

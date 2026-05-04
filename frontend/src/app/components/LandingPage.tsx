@@ -1,8 +1,11 @@
 import { Link } from 'react-router';
 import { Button } from './ui/button';
 import { Code2, Target, TrendingUp, Zap } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export function LandingPage() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col">
       {/* Hero Section */}
@@ -21,13 +24,28 @@ export function LandingPage() {
             deliberate practice with instant feedback and step-by-step execution traces.
           </p>
           
-          <div className="pt-4">
-            <Link to="/practice">
-              <Button size="lg" className="text-lg px-8 py-6">
-                <Target className="h-5 w-5 mr-2" />
-                Start Practice
-              </Button>
-            </Link>
+          <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+            {user ? (
+              <Link to="/practice">
+                <Button size="lg" className="text-lg px-8 py-6">
+                  <Target className="h-5 w-5 mr-2" />
+                  Start Practice
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/register">
+                  <Button size="lg" className="text-lg px-8 py-6">
+                    Get Started Free
+                  </Button>
+                </Link>
+                <Link to="/login">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                    Sign In
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

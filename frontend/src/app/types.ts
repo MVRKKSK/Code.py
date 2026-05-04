@@ -16,6 +16,16 @@ export interface ExecutionStep {
   description: string;
 }
 
+export interface PracticeTest {
+  id: string;
+  title: string;
+  language: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  tags: string[];
+  questions: CodeExercise[];
+  totalQuestions: number;
+}
+
 export interface UserProgress {
   totalAttempts: number;
   correctAnswers: number;
@@ -23,6 +33,7 @@ export interface UserProgress {
   bestStreak: number;
   lastPracticeDate: string;
   exerciseHistory: ExerciseAttempt[];
+  testHistory: TestAttempt[];
 }
 
 export interface ExerciseAttempt {
@@ -30,7 +41,15 @@ export interface ExerciseAttempt {
   userAnswer: string;
   correctAnswer: string;
   similarityScore: number;
-  confidence: number;
   timestamp: string;
   wasCorrect: boolean;
+}
+
+export interface TestAttempt {
+  testId: string;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  timestamp: string;
+  duration: number;
 }

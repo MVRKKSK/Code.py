@@ -18,7 +18,7 @@ export function RootLayout() {
       </main>
       <footer className="border-t border-border bg-card py-6">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 CodeLens. An educational tool for improving code comprehension.</p>
+          <p>© 2026 Code.py. An educational tool for improving code comprehension.</p>
         </div>
       </footer>
     </div>

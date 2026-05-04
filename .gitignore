@@ -12,6 +12,8 @@ server/node_modules/
 .env.*
 client/.env
 server/.env
+frontend/.env
+backend/.env
 
 # ----------------------
 # Logs
