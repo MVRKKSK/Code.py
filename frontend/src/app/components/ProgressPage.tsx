@@ -157,7 +157,7 @@ const formatDuration = (ms: number) => {
                     <div className="grid sm:grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Score: </span>
-                        <span className="font-medium">{test.score}%</span>
+                        <span className="font-medium">{test.score * 10}%</span>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Correct: </span>

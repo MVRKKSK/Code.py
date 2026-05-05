@@ -21,13 +21,7 @@ const handleResetProgress = async () => {
       }
     });
 
-    // optional: clear local UI cache
-    localStorage.removeItem('codelens_progress');
-
     setResetConfirm(false);
-
-    // refresh UI
-    window.location.reload();
 
   } catch (err) {
     console.error(err);
