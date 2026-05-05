@@ -89,11 +89,11 @@ const handleGenerate = async (e: FormEvent) => {
             </p>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
               <strong>Note:</strong> This is a demo version with mock generation. Connect to Supabase and add an AI API key to enable real AI-powered test generation with Claude or GPT.
             </p>
-          </div>
+          </div> */}
 
           <form onSubmit={handleGenerate} className="space-y-6">
             <div className="space-y-2">
