@@ -46,6 +46,13 @@ useEffect(() => {
   fetchProgress();
 }, []);
 
+const formatDuration = (ms: number) => {
+  const totalSeconds = Math.floor(ms / 1000);   // ✅ convert ms → sec
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}m ${seconds}s`;
+};
 
 
   const accuracy = progress.totalAttempts > 0
@@ -159,7 +166,7 @@ useEffect(() => {
                       <div>
                         <span className="text-muted-foreground">Duration: </span>
                         <span className="font-medium">
-                          {Math.floor(test.duration / 60)}m {test.duration % 60}s
+                          {formatDuration(test.duration)}
                         </span>
                       </div>
                     </div>

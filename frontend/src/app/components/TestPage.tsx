@@ -191,7 +191,7 @@ const completeTest = async () => {
 
   if (testCompleted) {
     const correctCount = results.filter(r => r.wasCorrect).length;
-    const scorePercentage = Math.round((correctCount / test.totalQuestions) * 100);
+    const scorePercentage = Math.round((correctCount / test.total_questions) * 100);
 
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -267,7 +267,7 @@ const completeTest = async () => {
     }
   };
 
-  const progressPercentage = ((currentQuestionIndex + 1) / test.totalQuestions) * 100;
+  const progressPercentage = ((currentQuestionIndex + 1) / test.total_questions) * 100;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -278,7 +278,7 @@ const completeTest = async () => {
             Exit Test
           </Button>
           <div className="text-sm text-muted-foreground">
-            Question {currentQuestionIndex + 1} of {test.totalQuestions}
+            Question {currentQuestionIndex + 1} of {test.total_questions}
           </div>
         </div>
 

@@ -167,3 +167,38 @@ export const submitTest = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const resetProgress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // delete exercise attempts
+    await supabase
+      .from('exercise_attempts')
+      .delete()
+      .eq('user_id', userId);
+
+    // delete test attempts
+    await supabase
+      .from('test_attempts')
+      .delete()
+      .eq('user_id', userId);
+
+    // reset summary
+    await supabase
+      .from('user_progress')
+      .upsert({
+        user_id: userId,
+        total_attempts: 0,
+        correct_answers: 0,
+        current_streak: 0,
+        best_streak: 0,
+        last_practice_date: null
+      });
+
+    res.json({ message: "Progress reset successfully" });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { BookOpen, Play } from 'lucide-react';
+import { BookOpen, Play,Sparkles,RotatCcw } from 'lucide-react';
+import { GenerateTestModal } from './GenerateTestModal';
 
 
 export function PracticeSelection() {
@@ -22,6 +23,7 @@ export function PracticeSelection() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [practiceTests, setPracticeTests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -82,13 +84,19 @@ export function PracticeSelection() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {showGenerateModal && <GenerateTestModal onClose={() => setShowGenerateModal(false)} />}
       <div className="space-y-8">
+
         <div>
-          <h1 className="mb-2">Practice Tests</h1>
-          <p className="text-muted-foreground">
-            Select a practice test to begin. Each test contains 10-15 questions.
-          </p>
-        </div>
+            <h1 className="mb-2">Practice Tests</h1>
+            <p className="text-muted-foreground">
+              Select a practice test to begin. Each test contains 10-15 questions.
+            </p>
+          </div>
+          <Button onClick={() => setShowGenerateModal(true)} className="shrink-0">
+            <Sparkles className="h-4 w-4 mr-2" />
+            Generate with AI
+          </Button>
 
         <Card className="p-6">
           <div className="space-y-6">

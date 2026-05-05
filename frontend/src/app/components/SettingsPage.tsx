@@ -3,22 +3,37 @@ import { Button } from './ui/button';
 import { Settings as SettingsIcon, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-const STORAGE_KEY = 'codelens_progress';
-
 export function SettingsPage() {
   const [resetConfirm, setResetConfirm] = useState(false);
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   
-  const handleResetProgress = () => {
-    if (!resetConfirm) {
-      setResetConfirm(true);
-      return;
-    }
-    
-    localStorage.removeItem(STORAGE_KEY);
+const handleResetProgress = async () => {
+  if (!resetConfirm) {
+    setResetConfirm(true);
+    return;
+  }
+
+  try {
+    await fetch(`${BASE_URL}/api/progress/reset`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+
+    // optional: clear local UI cache
+    localStorage.removeItem('codelens_progress');
+
     setResetConfirm(false);
+
+    // refresh UI
     window.location.reload();
-  };
-  
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to reset progress");
+  }
+};
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="space-y-8">

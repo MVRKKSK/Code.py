@@ -23,6 +23,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/problems' , authMiddleware, (await import('./routes/problems.js')).default);
 app.use('/api/progress' , authMiddleware, (await import('./routes/progress.routes.js')).default);
+app.use('/api/tests' , authMiddleware, (await import('./routes/gemini.routes.js')).default);
 
 // protected route
 app.get('/api/protected', authMiddleware, (req, res) => {
