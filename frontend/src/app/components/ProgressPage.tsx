@@ -182,7 +182,7 @@ const formatDuration = (ms: number) => {
                           : 'text-red-600'
                       }`}
                     >
-                      {test.score}%
+                      {test.score * 10}%
                     </div>
                   </div>
                 </div>
