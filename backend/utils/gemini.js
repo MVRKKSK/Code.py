@@ -7,7 +7,6 @@ const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
 // 🔥 fallback questions (never break UX)
 const fallbackQuestions = [
-  [
   {
     "code": "x = 10\ny = 5\nprint(x - y)",
     "expected_output": "5",
@@ -74,9 +73,7 @@ const fallbackQuestions = [
     "language": "Python",
     "difficulty": "easy",
     "tags": ["arrays"]
-  }
-]
-];
+  }];
 
 const cleanJSON = (text) => {
   return text
@@ -91,32 +88,20 @@ export const generateStructuredQuestions = async ({
   difficulty,
   count
 }) => {
+  try {
+    console.log("🚀 Trying AI once");
 
-  const models = [
-    "gemini-2.5-flash",
-    "gemini-2.5-pro"
-  ];
-
-  const body = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" }
-  };
-
-  for (const model of models) {
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        console.log(`🚀 Trying ${model}, attempt ${attempt}`);
-
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-          {
-            ...body,
-            body: JSON.stringify({
-              contents: [
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
                 {
-                  parts: [
-                    {
-                      text: `
+                  text: `
 Generate ${count} coding questions in STRICT JSON format.
 
 RULES:
@@ -148,47 +133,35 @@ FORMAT:
 
 Topic: ${prompt}
 `
-                    }
-                  ]
                 }
               ]
-            })
-          }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          if (data?.error?.code === 503) {
-            console.warn(`⚠️ ${model} overloaded, retrying...`);
-            await sleep(2000 * attempt);
-            continue;
-          }
-
-          throw new Error(data?.error?.message || "Gemini failed");
-        }
-
-        let text = data.candidates[0].content.parts[0].text;
-
-        // 🔥 clean markdown if exists
-        text = cleanJSON(text);
-
-        // 🔥 validate JSON
-        JSON.parse(text);
-
-        console.log("✅ AI success");
-        return text;
-
-      } catch (err) {
-        console.warn(`❌ ${model} attempt ${attempt} failed`);
-        if (attempt === 3) break;
-        await sleep(2000 * attempt);
+            }
+          ]
+        })
       }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.warn("⚠️ AI failed → using fallback");
+      return JSON.stringify(generateFallback(count, language, difficulty));
     }
+
+    let text = data.candidates[0].content.parts[0].text;
+
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    JSON.parse(text); // validate
+
+    console.log("✅ AI success");
+    return text;
+
+  } catch (err) {
+    console.warn("⚠️ AI crashed → using fallback");
+    return JSON.stringify(generateFallback(count, language, difficulty));
   }
-
-  // 🔥 FINAL SAFETY (never fail)
-  console.error("🚨 All AI models failed → using fallback");
-
-  return JSON.stringify(fallbackQuestions);
 };
